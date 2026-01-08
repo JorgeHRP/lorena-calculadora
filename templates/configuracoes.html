@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - Calculadora Pericial{% endblock %}
+
+{% block extra_css %}
+<style>
+.config-container {
+    max-width: 800px;
+}
+
+.config-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.config-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.config-card h2 svg {
+    width: 28px;
+    height: 28px;
+    color: var(--color-primary);
+}
+
+.config-card p {
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-xl);
+}
+
+.danger-zone {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border: 1px solid #ef5350;
+}
+
+.danger-zone h2 {
+    color: #c62828;
+}
+
+.danger-zone p {
+    color: #c62828;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-container">
+    {% include 'partials/sidebar.html' %}
+
+    <main class="main-content">
+        <div class="config-container">
+            <div class="page-header">
+                <h1 class="page-title">Configurações</h1>
+                <p class="page-subtitle">Gerencie suas informações profissionais</p>
+            </div>
+
+            <form method="POST" class="config-card">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Dados Profissionais
+                </h2>
+                <p>Informações que aparecerão nas suas propostas e orçamentos</p>
+
+                <div class="form-group">
+                    <label for="nome_completo">Nome Completo *</label>
+                    <input type="text" id="nome_completo" name="nome_completo" 
+                           value="{{ user.nome_completo if user else '' }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="numero_crp">Número CRP</label>
+                        <input type="text" id="numero_crp" name="numero_crp" 
+                               value="{{ user.numero_crp if user else '' }}" placeholder="Ex: SP 12.345">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone">Telefone de Contato</label>
+                        <input type="tel" id="telefone" name="telefone" 
+                               value="{{ user.telefone if user else '' }}" placeholder="(11) 98765-4321">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Profissional</label>
+                    <input type="email" value="{{ user.email if user else '' }}" disabled>
+                    <small class="form-help">O email não pode ser alterado</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+
+            <form method="POST" class="config-card">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 17v-2M8 11V7a4 4 0 118 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Segurança
+                </h2>
+                <p>Altere sua senha de acesso ao sistema</p>
+
+                <div class="form-group">
+                    <label for="nova_senha">Nova Senha</label>
+                    <input type="password" id="nova_senha" name="nova_senha" 
+                           placeholder="Digite sua nova senha (mínimo 6 caracteres)" minlength="6">
+                    <small class="form-help">Deixe em branco para manter a senha atual</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Atualizar Senha
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

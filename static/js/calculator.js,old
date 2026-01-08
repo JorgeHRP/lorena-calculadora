@@ -1,0 +1,290 @@
+// Dados da calculadora
+const calculatorData = {
+    step: 1,
+    taxaHoraria: window.TAXA_HORARIA || 37.50,
+    nomeCliente: '',
+    telefoneCliente: '',
+    tipoServico: '',
+    valorBase: 1000,
+    horasAnalise: 10,
+    grauUrgencia: 0,
+    grauEspecificidade: 0,
+    grauComplexidade: 0,
+    observacoes: ''
+};
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    // Atualizar custo de horas quando mudar
+    const horasInput = document.getElementById('horas_analise');
+    if (horasInput) {
+        horasInput.addEventListener('input', updateCustoHoras);
+        updateCustoHoras();
+    }
+    
+    // Inicializar sliders
+    ['urgencia', 'especificidade', 'complexidade'].forEach(type => {
+        const slider = document.getElementById(type);
+        if (slider) {
+            updateSlider(type);
+        }
+    });
+    
+    // Atualizar preview quando mudar valor base
+    const valorBaseInput = document.getElementById('valor_base');
+    if (valorBaseInput) {
+        valorBaseInput.addEventListener('input', updatePreview);
+    }
+});
+
+// Navegação entre steps
+function nextStep() {
+    if (validateCurrentStep()) {
+        if (calculatorData.step < 4) {
+            // Salvar dados do step atual
+            saveStepData();
+            
+            // Avançar step
+            calculatorData.step++;
+            updateStepDisplay();
+            
+            // Atualizar resumo se for o último step
+            if (calculatorData.step === 4) {
+                updateSummary();
+            }
+        }
+    }
+}
+
+function prevStep() {
+    if (calculatorData.step > 1) {
+        calculatorData.step--;
+        updateStepDisplay();
+    }
+}
+
+function validateCurrentStep() {
+    if (calculatorData.step === 1) {
+        const nomeCliente = document.getElementById('nome_cliente').value;
+        const tipoServico = document.querySelector('input[name="tipo_servico"]:checked');
+        
+        if (!nomeCliente) {
+            alert('Por favor, preencha o nome do cliente.');
+            return false;
+        }
+        
+        if (!tipoServico) {
+            alert('Por favor, selecione o tipo de serviço.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    if (calculatorData.step === 2) {
+        const valorBase = parseFloat(document.getElementById('valor_base').value);
+        const horasAnalise = parseFloat(document.getElementById('horas_analise').value);
+        
+        if (!valorBase || valorBase <= 0) {
+            alert('Por favor, preencha um valor base válido.');
+            return false;
+        }
+        
+        if (!horasAnalise || horasAnalise <= 0) {
+            alert('Por favor, preencha as horas de análise.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    return true;
+}
+
+function saveStepData() {
+    if (calculatorData.step === 1) {
+        calculatorData.nomeCliente = document.getElementById('nome_cliente').value;
+        calculatorData.telefoneCliente = document.getElementById('telefone_cliente').value;
+        const tipoServico = document.querySelector('input[name="tipo_servico"]:checked');
+        calculatorData.tipoServico = tipoServico ? tipoServico.value : '';
+    }
+    
+    if (calculatorData.step === 2) {
+        calculatorData.valorBase = parseFloat(document.getElementById('valor_base').value);
+        calculatorData.horasAnalise = parseFloat(document.getElementById('horas_analise').value);
+        updateCustoHoras();
+    }
+    
+    if (calculatorData.step === 3) {
+        calculatorData.grauUrgencia = parseInt(document.getElementById('urgencia').value);
+        calculatorData.grauEspecificidade = parseInt(document.getElementById('especificidade').value);
+        calculatorData.grauComplexidade = parseInt(document.getElementById('complexidade').value);
+    }
+}
+
+function updateStepDisplay() {
+    // Atualizar indicadores de step
+    document.querySelectorAll('.step').forEach((step, index) => {
+        const stepNumber = index + 1;
+        step.classList.remove('active', 'completed');
+        
+        if (stepNumber < calculatorData.step) {
+            step.classList.add('completed');
+        } else if (stepNumber === calculatorData.step) {
+            step.classList.add('active');
+        }
+    });
+    
+    // Atualizar cards visíveis
+    document.querySelectorAll('.calc-card').forEach((card, index) => {
+        card.classList.remove('active');
+        if (index + 1 === calculatorData.step) {
+            card.classList.add('active');
+        }
+    });
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Atualizar sliders
+function updateSlider(type) {
+    const value = parseInt(document.getElementById(type).value);
+    document.getElementById(type + 'Label').textContent = `+${value}%`;
+    
+    // Atualizar gradiente do slider
+    const slider = document.getElementById(type);
+    const percent = (value / parseInt(slider.max)) * 100;
+    slider.style.background = `linear-gradient(to right, #2c3e50 0%, #2c3e50 ${percent}%, #e1e8ed ${percent}%, #e1e8ed 100%)`;
+    
+    // Atualizar preview
+    updatePreview();
+}
+
+// Atualizar preview de ajustes
+function updatePreview() {
+    const valorBase = parseFloat(document.getElementById('valor_base')?.value || calculatorData.valorBase);
+    const urgencia = parseInt(document.getElementById('urgencia').value);
+    const especificidade = parseInt(document.getElementById('especificidade').value);
+    const complexidade = parseInt(document.getElementById('complexidade').value);
+    
+    const percentualTotal = urgencia + especificidade + complexidade;
+    const ajuste = valorBase * (percentualTotal / 100);
+    const valorAjustado = valorBase + ajuste;
+    
+    document.getElementById('previewBase').textContent = `R$ ${valorBase.toFixed(2).replace('.', ',')}`;
+    document.getElementById('previewAjustes').textContent = `+ R$ ${ajuste.toFixed(2).replace('.', ',')} (+${percentualTotal}%)`;
+    document.getElementById('previewTotal').textContent = `R$ ${valorAjustado.toFixed(2).replace('.', ',')}`;
+}
+
+// Atualizar custo de horas
+function updateCustoHoras() {
+    const horas = parseFloat(document.getElementById('horas_analise')?.value || 0);
+    const custo = horas * calculatorData.taxaHoraria;
+    
+    const custoHorasEl = document.getElementById('custoHoras');
+    if (custoHorasEl) {
+        custoHorasEl.textContent = `R$ ${custo.toFixed(2).replace('.', ',')}`;
+    }
+}
+
+// Atualizar resumo final
+function updateSummary() {
+    saveStepData();
+    
+    const valorBase = calculatorData.valorBase;
+    const horasAnalise = calculatorData.horasAnalise;
+    const custoHoras = horasAnalise * calculatorData.taxaHoraria;
+    
+    const percentualTotal = calculatorData.grauUrgencia + calculatorData.grauEspecificidade + calculatorData.grauComplexidade;
+    const ajuste = valorBase * (percentualTotal / 100);
+    const valorAjustado = valorBase + ajuste;
+    const valorTotal = valorAjustado + custoHoras;
+    
+    document.getElementById('finalCliente').textContent = calculatorData.nomeCliente;
+    document.getElementById('finalServico').textContent = calculatorData.tipoServico;
+    document.getElementById('finalBase').textContent = `R$ ${valorBase.toFixed(2).replace('.', ',')}`;
+    document.getElementById('finalHoras').textContent = `${horasAnalise}h`;
+    document.getElementById('finalCustoHoras').textContent = `R$ ${custoHoras.toFixed(2).replace('.', ',')}`;
+    document.getElementById('finalAjustes').textContent = `+${percentualTotal}% (R$ ${ajuste.toFixed(2).replace('.', ',')})`;
+    document.getElementById('finalTotal').textContent = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+}
+
+// Finalizar orçamento
+async function finalizarOrcamento() {
+    saveStepData();
+    
+    calculatorData.observacoes = document.getElementById('observacoes').value;
+    
+    const valorBase = calculatorData.valorBase;
+    const horasAnalise = calculatorData.horasAnalise;
+    const custoHoras = horasAnalise * calculatorData.taxaHoraria;
+    
+    const percentualTotal = calculatorData.grauUrgencia + calculatorData.grauEspecificidade + calculatorData.grauComplexidade;
+    const ajuste = valorBase * (percentualTotal / 100);
+    const valorAjustado = valorBase + ajuste;
+    const valorTotal = valorAjustado + custoHoras;
+    
+    const ajustes = [];
+    if (calculatorData.grauUrgencia > 0) {
+        ajustes.push({
+            tipo: 'Urgência',
+            percentual: calculatorData.grauUrgencia,
+            valor: valorBase * (calculatorData.grauUrgencia / 100)
+        });
+    }
+    if (calculatorData.grauEspecificidade > 0) {
+        ajustes.push({
+            tipo: 'Especificidade',
+            percentual: calculatorData.grauEspecificidade,
+            valor: valorBase * (calculatorData.grauEspecificidade / 100)
+        });
+    }
+    if (calculatorData.grauComplexidade > 0) {
+        ajustes.push({
+            tipo: 'Complexidade',
+            percentual: calculatorData.grauComplexidade,
+            valor: valorBase * (calculatorData.grauComplexidade / 100)
+        });
+    }
+    
+    const payload = {
+        nome_cliente: calculatorData.nomeCliente,
+        telefone_cliente: calculatorData.telefoneCliente,
+        tipo_servico: calculatorData.tipoServico,
+        valor_base: valorBase,
+        horas_analise: horasAnalise,
+        grau_urgencia: calculatorData.grauUrgencia,
+        grau_especificidade: calculatorData.grauEspecificidade,
+        grau_complexidade: calculatorData.grauComplexidade,
+        ajustes: ajustes,
+        valor_ajustado: valorAjustado,
+        taxa_horaria: calculatorData.taxaHoraria,
+        custo_horas_analise: custoHoras,
+        subtotal_fixo: valorAjustado,
+        valor_total: valorTotal,
+        observacoes: calculatorData.observacoes,
+        opcoes_pagamento: []
+    };
+    
+    try {
+        const response = await fetch('/api/salvar-orcamento', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Orçamento salvo com sucesso!\nNúmero: ${data.numero}`);
+            window.location.href = '/historico';
+        } else {
+            alert('Erro ao salvar orçamento: ' + (data.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        alert('Erro ao salvar orçamento: ' + error.message);
+    }
+}

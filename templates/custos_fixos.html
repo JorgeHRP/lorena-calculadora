@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Custos Fixos - Calculadora Pericial{% endblock %}
+
+{% block extra_css %}
+<style>
+.custos-container {
+    max-width: 900px;
+}
+
+.custos-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.custos-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.custos-card p {
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-xl);
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.result-box {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+}
+
+.result-row:not(:last-child) {
+    border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+}
+
+.result-label {
+    font-weight: 500;
+    color: #2e7d32;
+}
+
+.result-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.result-total {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 2px solid #2e7d32;
+}
+
+.result-total .result-label {
+    font-size: 1.25rem;
+    font-family: var(--font-display);
+}
+
+.result-total .result-value {
+    font-size: 2rem;
+    font-family: var(--font-display);
+}
+
+.btn-secondary {
+    background: var(--color-border);
+    color: var(--color-text);
+}
+
+.btn-secondary:hover {
+    background: var(--color-text-light);
+    color: white;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.info-banner {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.info-banner-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: rgba(33, 150, 243, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1976d2;
+    flex-shrink: 0;
+}
+
+.info-banner-content h4 {
+    color: #1976d2;
+    font-size: 1rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.info-banner-content p {
+    color: #1976d2;
+    font-size: 0.875rem;
+    margin: 0;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-container">
+    {% include 'partials/sidebar.html' %}
+
+    <main class="main-content">
+        <div class="custos-container">
+            <div class="page-header">
+                <h1 class="page-title">Custos Fixos Mensais</h1>
+                <p class="page-subtitle">Gerencie seus custos operacionais para cálculos automáticos</p>
+            </div>
+
+            <div class="info-banner">
+                <div class="info-banner-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="info-banner-content">
+                    <h4>Como funciona?</h4>
+                    <p>Seus custos fixos mensais são divididos pelas horas trabalhadas para calcular automaticamente seu valor/hora ideal. Atualize estes valores sempre que houver mudanças.</p>
+                </div>
+            </div>
+
+            <form method="POST" class="custos-card">
+                <h2>Configure seus custos operacionais</h2>
+                <p>Defina seus custos fixos mensais para calcular automaticamente seu valor/hora ideal</p>
+
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label for="aluguel_consultorio">Aluguel do Consultório</label>
+                        <input type="number" step="0.01" id="aluguel_consultorio" name="aluguel_consultorio" 
+                               value="{{ custos.aluguel_consultorio if custos else '1000.00' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="internet_telefonia">Internet e Telefonia</label>
+                        <input type="number" step="0.01" id="internet_telefonia" name="internet_telefonia" 
+                               value="{{ custos.internet_telefonia if custos else '200.00' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ferramentas_software">Ferramentas e Software</label>
+                        <input type="number" step="0.01" id="ferramentas_software" name="ferramentas_software" 
+                               value="{{ custos.ferramentas_software if custos else '150.00' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="anuidade_crp">Anuidade CRP (mensal)</label>
+                        <input type="number" step="0.01" id="anuidade_crp" name="anuidade_crp" 
+                               value="{{ custos.anuidade_crp if custos else '100.00' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="funcionarios_salarios">Funcionários (salários + encargos)</label>
+                        <input type="number" step="0.01" id="funcionarios_salarios" name="funcionarios_salarios" 
+                               value="{{ custos.funcionarios_salarios if custos else '0.00' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="outros_custos">Outros Custos</label>
+                        <input type="number" step="0.01" id="outros_custos" name="outros_custos" 
+                               value="{{ custos.outros_custos if custos else '0.00' }}" required>
+                    </div>
+                </div>
+
+                <div class="input-grid" style="margin-top: var(--spacing-lg);">
+                    <div class="form-group">
+                        <label for="horas_trabalhadas_mes">Horas Trabalhadas/Mês</label>
+                        <input type="number" id="horas_trabalhadas_mes" name="horas_trabalhadas_mes" 
+                               value="{{ custos.horas_trabalhadas_mes if custos else '160' }}" required>
+                        <small class="form-help">Normalmente 160h (8h × 20 dias úteis)</small>
+                    </div>
+                </div>
+
+                <div class="result-box" id="resultBox">
+                    <div class="result-row">
+                        <span class="result-label">Total de Custos Mensais:</span>
+                        <span class="result-value" id="totalCustos">R$ 0,00</span>
+                    </div>
+                    <div class="result-row result-total">
+                        <span class="result-label">Valor/Hora Calculado:</span>
+                        <span class="result-value" id="valorHora">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Salvar Custos
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+function calcularValorHora() {
+    const aluguel = parseFloat(document.getElementById('aluguel_consultorio').value) || 0;
+    const internet = parseFloat(document.getElementById('internet_telefonia').value) || 0;
+    const ferramentas = parseFloat(document.getElementById('ferramentas_software').value) || 0;
+    const anuidade = parseFloat(document.getElementById('anuidade_crp').value) || 0;
+    const funcionarios = parseFloat(document.getElementById('funcionarios_salarios').value) || 0;
+    const outros = parseFloat(document.getElementById('outros_custos').value) || 0;
+    const horas = parseFloat(document.getElementById('horas_trabalhadas_mes').value) || 160;
+    
+    const totalCustos = aluguel + internet + ferramentas + anuidade + funcionarios + outros;
+    const valorHora = horas > 0 ? totalCustos / horas : 0;
+    
+    document.getElementById('totalCustos').textContent = `R$ ${totalCustos.toFixed(2).replace('.', ',')}`;
+    document.getElementById('valorHora').textContent = `R$ ${valorHora.toFixed(2).replace('.', ',')}`;
+}
+
+// Calcular ao carregar e ao mudar qualquer campo
+document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('input', calcularValorHora);
+});
+
+calcularValorHora();
+</script>
+{% endblock %}

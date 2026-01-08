@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Conta - Calculadora Pericial{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-bg">
+        <div class="auth-pattern"></div>
+    </div>
+    
+    <div class="auth-content auth-content-register">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.9"/>
+                        <rect x="26" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.7"/>
+                        <rect x="4" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.5"/>
+                        <rect x="26" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.3"/>
+                    </svg>
+                </div>
+                <h1>Criar sua conta</h1>
+                <p>Comece a calcular seus honorários profissionalmente</p>
+            </div>
+
+            {% if erro %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+                    <path d="M10 6v4M10 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {{ erro }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="nome_completo">Nome Completo *</label>
+                    <input type="text" id="nome_completo" name="nome_completo" required placeholder="Dr(a). Seu Nome">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="numero_crp">Número CRP</label>
+                        <input type="text" id="numero_crp" name="numero_crp" placeholder="Ex: SP 12.345">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone">Telefone</label>
+                        <input type="tel" id="telefone" name="telefone" placeholder="(11) 98765-4321">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Profissional *</label>
+                    <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha *</label>
+                    <input type="password" id="senha" name="senha" required placeholder="Mínimo 6 caracteres" minlength="6">
+                    <small class="form-help">Use pelo menos 6 caracteres</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Criar conta
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Já tem uma conta?</p>
+                <a href="{{ url_for('login') }}" class="link-primary">Fazer login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

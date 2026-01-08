@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Cálculo - Calculadora Pericial{% endblock %}
+
+{% block extra_css %}
+<style>
+.calc-container {
+    max-width: 1000px;
+}
+
+.stepper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-2xl);
+    background: var(--color-surface);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-xl);
+}
+
+.step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--color-border);
+    z-index: 0;
+}
+
+.step.active:not(:last-child)::after {
+    background: var(--color-primary);
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-border);
+    color: var(--color-text-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    position: relative;
+    z-index: 1;
+    transition: all var(--transition-base);
+}
+
+.step.active .step-number {
+    background: var(--color-primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.step.completed .step-number {
+    background: var(--color-success);
+    color: white;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+.step.active .step-label {
+    color: var(--color-text);
+}
+
+.calc-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-xl);
+    display: none;
+}
+
+.calc-card.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calc-card h2 {
+    font-size: 1.75rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.calc-card p {
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-xl);
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.service-option {
+    position: relative;
+}
+
+.service-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.service-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-align: center;
+    height: 100%;
+}
+
+.service-option input[type="radio"]:checked + .service-label {
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, rgba(44,62,80,0.05) 0%, rgba(44,62,80,0.1) 100%);
+}
+
+.service-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.service-name {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.service-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-light);
+}
+
+.slider-group {
+    margin-bottom: var(--spacing-xl);
+}
+
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.slider-label span:first-child {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.slider-value {
+    font-weight: 600;
+    color: var(--color-primary);
+    font-family: var(--font-display);
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, var(--color-border) 0%, var(--color-primary) 0%);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all var(--transition-base);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.slider-markers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-sm);
+    font-size: 0.75rem;
+    color: var(--color-text-lighter);
+}
+
+.summary-box {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+}
+
+.summary-row:not(:last-child) {
+    border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+}
+
+.summary-label {
+    font-weight: 500;
+    color: #2e7d32;
+}
+
+.summary-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.summary-total {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 2px solid #2e7d32;
+}
+
+.summary-total .summary-label {
+    font-size: 1.25rem;
+    font-family: var(--font-display);
+}
+
+.summary-total .summary-value {
+    font-size: 2rem;
+    font-family: var(--font-display);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.btn-prev {
+    background: transparent;
+    border: 2px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.btn-prev:hover {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: white;
+}
+
+.btn-success {
+    background: var(--color-success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #229954;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="app-container">
+    {% include 'partials/sidebar.html' %}
+
+    <main class="main-content">
+        <div class="calc-container">
+            <div class="page-header">
+                <h1 class="page-title">Nova Proposta de Honorários</h1>
+                <p class="page-subtitle">Preencha as informações para gerar sua proposta profissional</p>
+            </div>
+
+            <div class="stepper">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Cliente & Serviço</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Valores Base</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Complexidade</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Resumo</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Cliente e Serviço -->
+            <div class="calc-card active" id="step1">
+                <h2>Informações do Cliente e Serviço</h2>
+                <p>Dados básicos sobre o cliente e tipo de perícia solicitada</p>
+
+                <div class="form-group">
+                    <label for="nome_cliente">Nome do Cliente *</label>
+                    <input type="text" id="nome_cliente" required placeholder="Nome completo ou razão social">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone_cliente">Telefone de Contato</label>
+                    <input type="tel" id="telefone_cliente" placeholder="(11) 98765-4321">
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Serviço *</label>
+                    <div class="service-grid">
+                        <div class="service-option">
+                            <input type="radio" name="tipo_servico" id="parecer" value="Parecer Técnico">
+                            <label for="parecer" class="service-label">
+                                <div class="service-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="service-name">Parecer Técnico</div>
+                                <div class="service-desc">Análise e opinião técnica</div>
+                            </label>
+                        </div>
+                        <div class="service-option">
+                            <input type="radio" name="tipo_servico" id="avaliacao" value="Avaliação Psicológica">
+                            <label for="avaliacao" class="service-label">
+                                <div class="service-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="service-name">Avaliação Psicológica</div>
+                                <div class="service-desc">Avaliação completa</div>
+                            </label>
+                        </div>
+                        <div class="service-option">
+                            <input type="radio" name="tipo_servico" id="pericia" value="Perícia Judicial">
+                            <label for="pericia" class="service-label">
+                                <div class="service-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 6h18M5 6v14a2 2 0 002 2h10a2 2 0 002-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="service-name">Perícia Judicial</div>
+                                <div class="service-desc">Perícia determinada judicialmente</div>
+                            </label>
+                        </div>
+                        <div class="service-option">
+                            <input type="radio" name="tipo_servico" id="outro" value="Outro Serviço">
+                            <label for="outro" class="service-label">
+                                <div class="service-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="service-name">Outro Serviço</div>
+                                <div class="service-desc">Especifique nas observações</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <div></div>
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                        Próximo
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Valores Base -->
+            <div class="calc-card" id="step2">
+                <h2>Valores Base e Horas</h2>
+                <p>Configure o valor base e as horas de análise estimadas</p>
+
+                <div class="form-group">
+                    <label for="valor_base">Valor Base do Serviço (R$) *</label>
+                    <input type="number" step="0.01" id="valor_base" required placeholder="1000.00" value="1000.00">
+                    <small class="form-help">Valor mínimo do serviço antes de ajustes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="horas_analise">Horas de Análise Estimadas *</label>
+                    <input type="number" step="0.5" id="horas_analise" required placeholder="10.0" value="10.0">
+                    <small class="form-help">Total de horas que serão dedicadas ao caso</small>
+                </div>
+
+                {% if custos_fixos %}
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span class="summary-label">Taxa Horária Configurada:</span>
+                        <span class="summary-value">R$ {{ "%.2f" | format((custos_fixos.aluguel_consultorio + custos_fixos.internet_telefonia + custos_fixos.ferramentas_software + custos_fixos.anuidade_crp + custos_fixos.funcionarios_salarios + custos_fixos.outros_custos) / custos_fixos.horas_trabalhadas_mes) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Custo Horas Análise:</span>
+                        <span class="summary-value" id="custoHoras">R$ 0,00</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-prev" onclick="prevStep()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Voltar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                        Próximo
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Complexidade -->
+            <div class="calc-card" id="step3">
+                <h2>Fatores de Complexidade</h2>
+                <p>Ajuste o valor conforme a complexidade do caso</p>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Grau de Urgência</span>
+                        <span class="slider-value" id="urgenciaLabel">0%</span>
+                    </div>
+                    <input type="range" id="urgencia" min="0" max="50" value="0" step="5" oninput="updateSlider('urgencia')">
+                    <div class="slider-markers">
+                        <span>Normal</span>
+                        <span>Urgente</span>
+                        <span>Muito Urgente</span>
+                    </div>
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Grau de Especificidade</span>
+                        <span class="slider-value" id="especificidadeLabel">0%</span>
+                    </div>
+                    <input type="range" id="especificidade" min="0" max="30" value="0" step="5" oninput="updateSlider('especificidade')">
+                    <div class="slider-markers">
+                        <span>Padrão</span>
+                        <span>Especializado</span>
+                    </div>
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Grau de Complexidade</span>
+                        <span class="slider-value" id="complexidadeLabel">0%</span>
+                    </div>
+                    <input type="range" id="complexidade" min="0" max="40" value="0" step="5" oninput="updateSlider('complexidade')">
+                    <div class="slider-markers">
+                        <span>Simples</span>
+                        <span>Médio</span>
+                        <span>Complexo</span>
+                    </div>
+                </div>
+
+                <div class="summary-box" id="ajustesPreview">
+                    <div class="summary-row">
+                        <span class="summary-label">Valor Base:</span>
+                        <span class="summary-value" id="previewBase">R$ 0,00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Ajustes:</span>
+                        <span class="summary-value" id="previewAjustes">+ R$ 0,00</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span class="summary-label">Valor Ajustado:</span>
+                        <span class="summary-value" id="previewTotal">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-prev" onclick="prevStep()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Voltar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                        Próximo
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Resumo e Finalização -->
+            <div class="calc-card" id="step4">
+                <h2>Resumo da Proposta</h2>
+                <p>Revise todos os dados antes de finalizar</p>
+
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span class="summary-label">Cliente:</span>
+                        <span class="summary-value" id="finalCliente">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Tipo de Serviço:</span>
+                        <span class="summary-value" id="finalServico">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Valor Base:</span>
+                        <span class="summary-value" id="finalBase">R$ 0,00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Horas de Análise:</span>
+                        <span class="summary-value" id="finalHoras">0h</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Custo Horas:</span>
+                        <span class="summary-value" id="finalCustoHoras">R$ 0,00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Ajustes Aplicados:</span>
+                        <span class="summary-value" id="finalAjustes">0%</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span class="summary-label">Valor Total:</span>
+                        <span class="summary-value" id="finalTotal">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observacoes">Observações (opcional)</label>
+                    <textarea id="observacoes" rows="4" placeholder="Adicione observações ou informações adicionais sobre o orçamento..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-prev" onclick="prevStep()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Voltar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="finalizarOrcamento()">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Finalizar e Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
+{% endblock %}

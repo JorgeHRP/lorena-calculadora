@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Calculadora Pericial{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-bg">
+        <div class="auth-pattern"></div>
+    </div>
+    
+    <div class="auth-content">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.9"/>
+                        <rect x="26" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.7"/>
+                        <rect x="4" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.5"/>
+                        <rect x="26" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.3"/>
+                    </svg>
+                </div>
+                <h1>Bem-vindo(a)</h1>
+                <p>Faça login para acessar sua calculadora pericial</p>
+            </div>
+
+            {% if erro %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+                    <path d="M10 6v4M10 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {{ erro }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Email Profissional</label>
+                    <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    Entrar
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Ainda não tem uma conta?</p>
+                <a href="{{ url_for('registro') }}" class="link-primary">Criar conta gratuitamente</a>
+            </div>
+        </div>
+
+        <div class="auth-info">
+            <h2>Calcule honorários periciais com precisão</h2>
+            <ul class="feature-list">
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Cálculos automáticos e precisos</span>
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Geração de propostas em PDF</span>
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Histórico completo de orçamentos</span>
+                </li>
+                <li>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
+                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Gestão de custos operacionais</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
