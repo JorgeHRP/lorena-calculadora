@@ -1,18 +1,20 @@
 import os
 import json
 from datetime import datetime
-from functools import wraps
+from functools import wraps, partial
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
+from io import BytesIO
+from dotenv import load_dotenv
+
+# Imports do ReportLab para o PDF
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
-from io import BytesIO
-from dotenv import load_dotenv
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT, TA_JUSTIFY
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
@@ -278,178 +280,223 @@ def deletar_orcamento(id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# =======================================================
+# NOVA ROTA DE GERAÇÃO DE PDF (CLEAN & ALTO PADRÃO)
+# =======================================================
+
 @app.route('/api/gerar-pdf/<int:id>')
 @login_required
 def gerar_pdf(id):
     try:
-        # Buscar orçamento
+        # 1. Buscar dados do Orçamento
         response = supabase.table('lorena-orcamentos').select('*').eq('id', id).eq('usuario_id', session['user_id']).execute()
         
         if not response.data:
             return "Orçamento não encontrado", 404
         
         orcamento = response.data[0]
-        dados = json.loads(orcamento['dados_completos'])
         
-        # Buscar dados do usuário
+        # CORREÇÃO DO ERRO: Se o supabase retornou uma string JSON, converte para dict
+        if isinstance(orcamento, str):
+            orcamento = json.loads(orcamento)
+
+        # 2. Buscar dados do Usuário
         user_response = supabase.table('lorena-usuarios').select('*').eq('id', session['user_id']).execute()
+        
+        if not user_response.data:
+            return "Usuário não encontrado", 404
+            
         user = user_response.data[0]
         
-        # Criar PDF
+        # CORREÇÃO DO ERRO: Mesma segurança para o usuário
+        if isinstance(user, str):
+            user = json.loads(user)
+        
+        # 3. Configuração do PDF
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=20*mm, bottomMargin=20*mm)
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=A4, 
+            topMargin=25*mm,
+            bottomMargin=20*mm, 
+            leftMargin=20*mm, 
+            rightMargin=20*mm
+        )
+        
         elements = []
         styles = getSampleStyleSheet()
         
-        # Estilo personalizado
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=18,
-            textColor=colors.HexColor('#1a1a2e'),
-            spaceAfter=12,
-            alignment=TA_CENTER
-        )
+        # Cores e Estilos
+        COLOR_PRIMARY = colors.HexColor('#059669')
+        COLOR_DARK = colors.HexColor('#111827')
+        COLOR_GRAY = colors.HexColor('#6b7280')
         
-        subtitle_style = ParagraphStyle(
-            'CustomSubtitle',
-            parent=styles['Normal'],
-            fontSize=11,
-            textColor=colors.HexColor('#666666'),
-            spaceAfter=20,
-            alignment=TA_CENTER
-        )
+        # Estilos Personalizados
+        style_title = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=16, textColor=COLOR_DARK, alignment=TA_RIGHT, spaceAfter=2)
+        style_subtitle = ParagraphStyle('DocSub', parent=styles['Normal'], fontSize=10, textColor=COLOR_PRIMARY, alignment=TA_RIGHT)
+        style_section = ParagraphStyle('Section', parent=styles['Heading2'], fontSize=12, textColor=COLOR_PRIMARY, spaceBefore=15, spaceAfter=8, textTransform='uppercase')
+        style_label = ParagraphStyle('Label', parent=styles['Normal'], fontSize=9, textColor=COLOR_GRAY, leading=11)
+        style_value = ParagraphStyle('Value', parent=styles['Normal'], fontSize=10, textColor=COLOR_DARK, leading=12, fontName='Helvetica-Bold')
+        style_normal = ParagraphStyle('NormalText', parent=styles['Normal'], fontSize=10, textColor=COLOR_DARK, leading=14, alignment=TA_JUSTIFY)
         
-        # Título
-        elements.append(Paragraph("PROPOSTA DE HONORÁRIOS", title_style))
-        elements.append(Paragraph("Perícia Psicológica", subtitle_style))
+        # --- CABEÇALHO ---
+        logo_path = os.path.join(app.static_folder, 'logo.png')
+        header_content = []
+        
+        if os.path.exists(logo_path):
+            img = Image(logo_path, width=45*mm, height=45*mm, kind='proportional')
+            img.hAlign = 'LEFT'
+            header_content.append(img)
+        else:
+            header_content.append(Paragraph("<b>VALORA</b>", style_section))
+
+        # Tratamento de datas
+        try:
+            data_criacao = orcamento.get('created_at', datetime.now().isoformat())
+            data_fmt = datetime.fromisoformat(data_criacao.replace('Z', '+00:00')).strftime('%d/%m/%Y')
+        except:
+            data_fmt = datetime.now().strftime('%d/%m/%Y')
+
+        info_doc = [
+            Paragraph("PROPOSTA DE HONORÁRIOS", style_title),
+            Paragraph(f"Ref: {orcamento.get('numero', '---')}", style_subtitle),
+            Spacer(1, 5),
+            Paragraph(f"Emitido em: {data_fmt}", ParagraphStyle('Date', parent=styles['Normal'], alignment=TA_RIGHT, fontSize=9, textColor=COLOR_GRAY))
+        ]
+        
+        header_table = Table([[header_content[0] if header_content else "", info_doc]], colWidths=[85*mm, 85*mm])
+        header_table.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('ALIGN', (1,0), (1,0), 'RIGHT'),
+            ('LEFTPADDING', (0,0), (-1,-1), 0),
+            ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ]))
+        elements.append(header_table)
+        
+        elements.append(Spacer(1, 5*mm))
+        elements.append(Table([['']], colWidths=[170*mm], style=TableStyle([('LINEBELOW', (0,0), (-1,-1), 1, COLOR_PRIMARY)])))
         elements.append(Spacer(1, 10*mm))
-        
-        # Informações do profissional
-        prof_data = [
-            ['PSICÓLOGO(A) PERITO(A)', ''],
-            ['Nome:', user['nome_completo']],
-            ['CRP:', user['numero_crp'] or 'Não informado'],
-            ['Telefone:', user['telefone'] or 'Não informado'],
-            ['Email:', user['email']]
+
+        # --- DADOS DAS PARTES ---
+        prof_text = [
+            [Paragraph("PROFISSIONAL", style_section)],
+            [Paragraph("Nome Completo:", style_label)],
+            [Paragraph(user.get('nome_completo', ''), style_value)],
+            [Spacer(1, 3)],
+            [Paragraph("Registro (CRP):", style_label)],
+            [Paragraph(user.get('numero_crp') or 'Não informado', style_value)],
+            [Spacer(1, 3)],
+            [Paragraph("Contato:", style_label)],
+            [Paragraph(user.get('email', ''), style_value)],
+            [Paragraph(user.get('telefone') or '', style_value)]
         ]
-        
-        prof_table = Table(prof_data, colWidths=[45*mm, 120*mm])
-        prof_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a1a2e')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#f0f0f0')),
-            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ]))
-        elements.append(prof_table)
-        elements.append(Spacer(1, 8*mm))
-        
-        # Informações do cliente
-        client_data = [
-            ['DADOS DO CLIENTE', ''],
-            ['Nome:', orcamento['nome_cliente']],
-            ['Telefone:', orcamento.get('telefone_cliente') or 'Não informado'],
-            ['Tipo de Serviço:', orcamento['tipo_servico']],
-            ['Data:', datetime.fromisoformat(orcamento['created_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y')]
+
+        client_text = [
+            [Paragraph("CLIENTE", style_section)],
+            [Paragraph("Nome / Responsável:", style_label)],
+            [Paragraph(orcamento.get('nome_cliente', ''), style_value)],
+            [Spacer(1, 3)],
+            [Paragraph("Telefone:", style_label)],
+            [Paragraph(orcamento.get('telefone_cliente') or 'Não informado', style_value)],
+            [Spacer(1, 3)],
+            [Paragraph("Serviço:", style_label)],
+            [Paragraph(orcamento.get('tipo_servico', ''), style_value)]
         ]
-        
-        client_table = Table(client_data, colWidths=[45*mm, 120*mm])
-        client_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a1a2e')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#f0f0f0')),
-            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+
+        partes_table = Table([[Table(prof_text, colWidths=[80*mm]), Table(client_text, colWidths=[80*mm])]], colWidths=[85*mm, 85*mm])
+        partes_table.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING', (0,0), (-1,-1), 0),
         ]))
-        elements.append(client_table)
-        elements.append(Spacer(1, 8*mm))
-        
-        # Detalhamento dos valores
-        valores_data = [
-            ['DETALHAMENTO DOS HONORÁRIOS', ''],
-            ['Valor Base:', f"R$ {orcamento['valor_base']:.2f}"],
-            ['Taxa Horária:', f"R$ {orcamento['taxa_horaria']:.2f}"],
-            ['Horas de Análise:', f"{orcamento['horas_analise']:.1f}h"],
-            ['Custo Horas de Análise:', f"R$ {orcamento['custo_horas_analise']:.2f}"],
-        ]
-        
-        if orcamento['valor_ajustado'] and orcamento['valor_ajustado'] != orcamento['valor_base']:
-            valores_data.append(['Valor com Ajustes:', f"R$ {orcamento['valor_ajustado']:.2f}"])
-        
-        valores_data.append(['', ''])
-        valores_data.append(['VALOR TOTAL:', f"R$ {orcamento['valor_total']:.2f}"])
-        
-        valores_table = Table(valores_data, colWidths=[120*mm, 45*mm])
-        valores_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a1a2e')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BACKGROUND', (0, 1), (0, -2), colors.HexColor('#f0f0f0')),
-            ('FONTNAME', (0, 1), (0, -2), 'Helvetica-Bold'),
-            ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
-            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#e8f5e9')),
-            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, -1), (-1, -1), 14),
-            ('TEXTCOLOR', (1, -1), (1, -1), colors.HexColor('#2e7d32')),
-            ('GRID', (0, 0), (-1, -2), 0.5, colors.grey),
-            ('BOX', (0, -1), (-1, -1), 1.5, colors.HexColor('#2e7d32')),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ]))
-        elements.append(valores_table)
-        
-        if orcamento.get('observacoes'):
-            elements.append(Spacer(1, 8*mm))
-            obs_style = ParagraphStyle(
-                'Obs',
-                parent=styles['Normal'],
-                fontSize=9,
-                textColor=colors.HexColor('#666666')
-            )
-            elements.append(Paragraph(f"<b>Observações:</b><br/>{orcamento['observacoes']}", obs_style))
-        
-        # Rodapé
+        elements.append(partes_table)
         elements.append(Spacer(1, 15*mm))
-        footer_style = ParagraphStyle(
-            'Footer',
-            parent=styles['Normal'],
-            fontSize=8,
-            textColor=colors.HexColor('#999999'),
-            alignment=TA_CENTER
-        )
-        elements.append(Paragraph(f"Proposta gerada em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", footer_style))
-        elements.append(Paragraph(f"Número da proposta: {orcamento['numero']}", footer_style))
+
+        # --- TABELA FINANCEIRA ---
+        elements.append(Paragraph("DETALHAMENTO DO INVESTIMENTO", style_section))
+        elements.append(Spacer(1, 3*mm))
+
+        # Valores seguros (float)
+        try:
+            val_base = float(orcamento.get('valor_base', 0))
+            val_ajustado = float(orcamento.get('valor_ajustado', 0))
+            val_total = float(orcamento.get('valor_total', 0))
+            custo_hora = float(orcamento.get('custo_horas_analise', 0))
+        except ValueError:
+            val_base = val_ajustado = val_total = custo_hora = 0.0
+
+        f_data = [['Descrição do Serviço', 'Valor']]
+        f_data.append(['Valor Base Estimado', f"R$ {val_base:.2f}"])
+        f_data.append(['Custo Hora Técnica', f"R$ {custo_hora:.2f}"])
         
-        # Construir PDF
-        doc.build(elements)
+        if val_ajustado and val_ajustado != val_base:
+             diferenca = val_ajustado - val_base
+             f_data.append(['Ajustes e Especificidades', f"R$ {diferenca:.2f}"])
+
+        t = Table(f_data, colWidths=[130*mm, 40*mm])
+        t.setStyle(TableStyle([
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0,0), (-1,0), COLOR_PRIMARY),
+            ('FONTSIZE', (0,0), (-1,0), 9),
+            ('BOTTOMPADDING', (0,0), (-1,0), 8),
+            ('LINEBELOW', (0,0), (-1,0), 1, COLOR_PRIMARY),
+            ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+            ('TEXTCOLOR', (0,1), (-1,-1), COLOR_DARK),
+            ('FONTSIZE', (0,1), (-1,-1), 10),
+            ('ALIGN', (1,0), (1,-1), 'RIGHT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('TOPPADDING', (0,1), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,1), (-1,-1), 8),
+            ('LINEBELOW', (0,1), (-1,-2), 0.5, colors.HexColor('#e5e7eb')),
+        ]))
+        elements.append(t)
+
+        # Total
+        elements.append(Spacer(1, 2*mm))
+        total_row = ['TOTAL DO INVESTIMENTO', f"R$ {val_total:.2f}"]
+        total_table = Table([total_row], colWidths=[130*mm, 40*mm])
+        total_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#ecfdf5')),
+            ('TEXTCOLOR', (0,0), (-1,-1), COLOR_PRIMARY),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 12),
+            ('ALIGN', (1,0), (1,0), 'RIGHT'),
+            ('TOPPADDING', (0,0), (-1,-1), 12),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+        ]))
+        elements.append(total_table)
+
+        # --- OBSERVAÇÕES ---
+        obs = orcamento.get('observacoes')
+        if obs:
+            elements.append(Spacer(1, 15*mm))
+            elements.append(Paragraph("OBSERVAÇÕES", style_section))
+            elements.append(Paragraph(obs.replace('\n', '<br/>'), style_normal))
+
+        # --- RODAPÉ ---
+        def footer_bg(canvas, doc):
+            canvas.saveState()
+            canvas.setStrokeColor(colors.HexColor('#e5e7eb'))
+            canvas.setLineWidth(0.5)
+            canvas.line(20*mm, 15*mm, 190*mm, 15*mm)
+            canvas.setFont('Helvetica', 8)
+            canvas.setFillColor(colors.HexColor('#9ca3af'))
+            canvas.drawString(20*mm, 10*mm, "VALORA - Soluções em Psicologia e Perícia")
+            canvas.drawRightString(190*mm, 10*mm, f"Página {canvas.getPageNumber()}")
+            canvas.restoreState()
+
+        doc.build(elements, onFirstPage=footer_bg, onLaterPages=footer_bg)
         buffer.seek(0)
         
         return send_file(
             buffer,
             mimetype='application/pdf',
             as_attachment=True,
-            download_name=f"proposta_{orcamento['numero']}.pdf"
+            download_name=f"Proposta_Valora_{orcamento.get('numero', 'doc')}.pdf"
         )
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return f"Erro ao gerar PDF: {str(e)}", 500
 
 if __name__ == '__main__':

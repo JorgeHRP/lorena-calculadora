@@ -1,92 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Calculadora Pericial{% endblock %}
+{% block title %}Dashboard - PeriCalc{% endblock %}
 
 {% block body %}
 <div class="app-container">
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-small">
-                <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
-                    <rect x="4" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.9"/>
-                    <rect x="26" y="4" width="18" height="18" rx="3" fill="currentColor" opacity="0.7"/>
-                    <rect x="4" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.5"/>
-                    <rect x="26" y="26" width="18" height="18" rx="3" fill="currentColor" opacity="0.3"/>
-                </svg>
-            </div>
-            <span class="logo-text">Calculator</span>
-        </div>
-
-        <ul class="nav-menu">
-            <li class="nav-item active">
-                <a href="{{ url_for('dashboard') }}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M3 10h4m10 0H7m0 0V6m0 4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('novo_calculo') }}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                        <path d="M10 7v6M7 10h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>Novo Cálculo</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('historico') }}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M10 4v6l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
-                    </svg>
-                    <span>Histórico</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('custos_fixos') }}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
-                        <path d="M10 7v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M10 2v2M18 10h-2M10 18v-2M2 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>Custos Fixos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('configuracoes') }}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
-                        <path d="M10 2v2m0 12v2M18 10h-2M4 10H2m14.364-5.364l-1.414 1.414m-9.9 9.9L3.636 14.636m12.728 0l-1.414-1.414m-9.9-9.9L3.636 4.636" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>Configurações</span>
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar">
-                    {{ user_nome[0]|upper if user_nome else 'U' }}
-                </div>
-                <div class="user-details">
-                    <div class="user-name">{{ user_nome }}</div>
-                    <div class="user-role">Psicólogo(a) Perito(a)</div>
-                </div>
-            </div>
-            <a href="{{ url_for('logout') }}" class="btn-logout" title="Sair">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M7 17H4a2 2 0 01-2-2V5a2 2 0 012-2h3m7 13l5-5-5-5m5 5H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-        </div>
-    </nav>
+    {% include 'partials/sidebar.html' %}
 
     <main class="main-content">
         <header class="page-header">
             <div>
-                <h1 class="page-title">Boa tarde, {{ user_nome.split()[0] if user_nome else 'Usuário' }}! 👋</h1>
+                <h1 class="page-title">Olá, {{ user_nome.split()[0] if user_nome else 'Usuário' }}! 👋</h1>
                 <p class="page-subtitle">O que você deseja fazer hoje?</p>
             </div>
         </header>
@@ -94,63 +17,67 @@
         <div class="dashboard-grid">
             <a href="{{ url_for('novo_calculo') }}" class="dashboard-card card-primary">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <rect x="4" y="4" width="24" height="24" rx="4" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 16h8M16 12v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
                     </svg>
                 </div>
                 <div class="card-content">
                     <h3>Novo Cálculo</h3>
-                    <p>Calcule seus honorários periciais</p>
+                    <p>Calcule seus honorários periciais de forma profissional</p>
                 </div>
                 <div class="card-arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14M15 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </div>
             </a>
 
             <a href="{{ url_for('historico') }}" class="dashboard-card">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 8v8l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <circle cx="16" cy="16" r="11" stroke="currentColor" stroke-width="2"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                     </svg>
                 </div>
                 <div class="card-content">
                     <h3>Histórico</h3>
-                    <p>Consulte seus cálculos anteriores</p>
+                    <p>Consulte e gerencie seus cálculos anteriores</p>
                 </div>
                 <div class="card-arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14M15 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </div>
             </a>
 
             <a href="{{ url_for('custos_fixos') }}" class="dashboard-card">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <circle cx="16" cy="16" r="3" stroke="currentColor" stroke-width="2"/>
-                        <path d="M16 4v4m0 16v4M28 16h-4M8 16H4m19.8-8.5l-2.8 2.8m-14 14l-2.8 2.8m17.6 0l-2.8-2.8m-14-14l-2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
                 </div>
                 <div class="card-content">
                     <h3>Custos Fixos</h3>
-                    <p>Gerencie seus custos operacionais mensais</p>
+                    <p>Configure seus custos operacionais mensais</p>
                 </div>
                 <div class="card-arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14M15 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </div>
             </a>
 
             <a href="{{ url_for('configuracoes') }}" class="dashboard-card">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <circle cx="16" cy="16" r="3" stroke="currentColor" stroke-width="2"/>
-                        <path d="M16 4v4m0 16v4M28 16h-4M8 16H4m19.8-8.5l-2.8 2.8m-14 14l-2.8 2.8m17.6 0l-2.8-2.8m-14-14l-2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+                        <path d="M20.2 20.2l-4.2-4.2m0-8l4.2-4.2M3.8 3.8l4.2 4.2m0 8l-4.2 4.2"></path>
                     </svg>
                 </div>
                 <div class="card-content">
@@ -158,8 +85,9 @@
                     <p>Configure seu perfil profissional</p>
                 </div>
                 <div class="card-arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14M15 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </div>
             </a>
@@ -168,9 +96,10 @@
         <div class="info-section">
             <div class="info-card">
                 <div class="info-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                 </div>
                 <div class="info-content">

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Custos Fixos - Calculadora Pericial{% endblock %}
+{% block title %}Custos Fixos - PeriCalc{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,6 +13,7 @@
     border-radius: var(--radius-xl);
     padding: var(--spacing-2xl);
     margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--color-border);
 }
 
 .custos-card h2 {
@@ -32,10 +33,11 @@
 }
 
 .result-box {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
     margin-top: var(--spacing-xl);
+    border: 1px solid #a7f3d0;
 }
 
 .result-row {
@@ -46,24 +48,24 @@
 }
 
 .result-row:not(:last-child) {
-    border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+    border-bottom: 1px solid rgba(5, 150, 105, 0.2);
 }
 
 .result-label {
     font-weight: 500;
-    color: #2e7d32;
+    color: #047857;
 }
 
 .result-value {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #2e7d32;
+    color: #047857;
 }
 
 .result-total {
     margin-top: var(--spacing-lg);
     padding-top: var(--spacing-lg);
-    border-top: 2px solid #2e7d32;
+    border-top: 2px solid #059669;
 }
 
 .result-total .result-label {
@@ -74,53 +76,39 @@
 .result-total .result-value {
     font-size: 2rem;
     font-family: var(--font-display);
-}
-
-.btn-secondary {
-    background: var(--color-border);
-    color: var(--color-text);
-}
-
-.btn-secondary:hover {
-    background: var(--color-text-light);
-    color: white;
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
+    color: var(--color-success);
 }
 
 .info-banner {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
     display: flex;
     gap: var(--spacing-md);
+    border: 1px solid #93c5fd;
 }
 
 .info-banner-icon {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-md);
-    background: rgba(33, 150, 243, 0.2);
+    background: rgba(14, 165, 233, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1976d2;
+    color: #0284c7;
     flex-shrink: 0;
 }
 
 .info-banner-content h4 {
-    color: #1976d2;
+    color: #0284c7;
     font-size: 1rem;
     margin-bottom: var(--spacing-xs);
 }
 
 .info-banner-content p {
-    color: #1976d2;
+    color: #0369a1;
     font-size: 0.875rem;
     margin: 0;
 }
@@ -140,9 +128,10 @@
 
             <div class="info-banner">
                 <div class="info-banner-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                 </div>
                 <div class="info-banner-content">
@@ -215,8 +204,8 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         Salvar Custos
                     </button>

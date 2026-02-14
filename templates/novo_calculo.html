@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Novo Cálculo - Calculadora Pericial{% endblock %}
+{% block title %}Novo Cálculo - PeriCalc{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -8,6 +8,7 @@
     max-width: 1000px;
 }
 
+/* Stepper */
 .stepper {
     display: flex;
     justify-content: space-between;
@@ -15,6 +16,7 @@
     background: var(--color-surface);
     padding: var(--spacing-xl);
     border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
 }
 
 .step {
@@ -31,35 +33,38 @@
     top: 20px;
     left: 50%;
     width: 100%;
-    height: 2px;
+    height: 3px;
     background: var(--color-border);
     z-index: 0;
 }
 
-.step.active:not(:last-child)::after {
-    background: var(--color-primary);
+.step.active:not(:last-child)::after,
+.step.completed:not(:last-child)::after {
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
 }
 
 .step-number {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: var(--color-border);
     color: var(--color-text-lighter);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: var(--spacing-sm);
     position: relative;
     z-index: 1;
     transition: all var(--transition-base);
+    border: 3px solid var(--color-surface);
 }
 
 .step.active .step-number {
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
 .step.completed .step-number {
@@ -69,7 +74,7 @@
 
 .step-label {
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text-light);
     text-align: center;
 }
@@ -78,12 +83,14 @@
     color: var(--color-text);
 }
 
+/* Cards */
 .calc-card {
     background: var(--color-surface);
     border-radius: var(--radius-xl);
     padding: var(--spacing-2xl);
     margin-bottom: var(--spacing-xl);
     display: none;
+    border: 1px solid var(--color-border);
 }
 
 .calc-card.active {
@@ -107,14 +114,15 @@
     margin-bottom: var(--spacing-sm);
 }
 
-.calc-card p {
+.calc-card > p {
     color: var(--color-text-light);
     margin-bottom: var(--spacing-xl);
 }
 
+/* Service Grid */
 .service-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--spacing-md);
 }
 
@@ -131,25 +139,33 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: all var(--transition-base);
     text-align: center;
     height: 100%;
+    background: var(--color-surface);
+}
+
+.service-label:hover {
+    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .service-option input[type="radio"]:checked + .service-label {
     border-color: var(--color-primary);
-    background: linear-gradient(135deg, rgba(44,62,80,0.05) 0%, rgba(44,62,80,0.1) 100%);
+    background: linear-gradient(135deg, rgba(5,150,105,0.05) 0%, rgba(5,150,105,0.1) 100%);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
 }
 
 .service-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-md);
-    background: var(--color-bg);
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(5,150,105,0.1) 0%, rgba(5,150,105,0.15) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -157,10 +173,16 @@
     margin-bottom: var(--spacing-md);
 }
 
+.service-option input[type="radio"]:checked + .service-label .service-icon {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    color: white;
+}
+
 .service-name {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-text);
     margin-bottom: var(--spacing-xs);
+    font-size: 1rem;
 }
 
 .service-desc {
@@ -168,8 +190,9 @@
     color: var(--color-text-light);
 }
 
+/* Sliders */
 .slider-group {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
 }
 
 .slider-label {
@@ -180,54 +203,67 @@
 }
 
 .slider-label span:first-child {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text);
+    font-size: 1rem;
 }
 
 .slider-value {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-primary);
     font-family: var(--font-display);
+    font-size: 1.125rem;
 }
 
 input[type="range"] {
     width: 100%;
-    height: 8px;
-    border-radius: 4px;
-    background: linear-gradient(to right, var(--color-border) 0%, var(--color-primary) 0%);
+    height: 10px;
+    border-radius: 5px;
+    background: var(--color-border);
     outline: none;
     -webkit-appearance: none;
+    margin-bottom: var(--spacing-sm);
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
     transition: all var(--transition-base);
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
 }
 
 .slider-markers {
     display: flex;
     justify-content: space-between;
-    margin-top: var(--spacing-sm);
     font-size: 0.75rem;
     color: var(--color-text-lighter);
 }
 
+/* Summary Box */
 .summary-box {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
-    margin-top: var(--spacing-xl);
+    border: 1px solid #a7f3d0;
 }
 
 .summary-row {
@@ -238,24 +274,24 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .summary-row:not(:last-child) {
-    border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+    border-bottom: 1px solid rgba(5, 150, 105, 0.2);
 }
 
 .summary-label {
     font-weight: 500;
-    color: #2e7d32;
+    color: #047857;
 }
 
 .summary-value {
     font-size: 1.125rem;
-    font-weight: 600;
-    color: #2e7d32;
+    font-weight: 700;
+    color: #047857;
 }
 
 .summary-total {
-    margin-top: var(--spacing-lg);
+    margin-top: var(--spacing-md);
     padding-top: var(--spacing-lg);
-    border-top: 2px solid #2e7d32;
+    border-top: 2px solid #059669 !important;
 }
 
 .summary-total .summary-label {
@@ -266,15 +302,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .summary-total .summary-value {
     font-size: 2rem;
     font-family: var(--font-display);
+    color: var(--color-success);
 }
 
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
-}
-
+/* Buttons */
 .btn-prev {
     background: transparent;
     border: 2px solid var(--color-border);
@@ -282,18 +313,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .btn-prev:hover {
-    border-color: var(--color-text);
-    background: var(--color-text);
-    color: white;
-}
-
-.btn-success {
-    background: var(--color-success);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #229954;
+    background: var(--color-bg);
+    border-color: var(--color-text-light);
 }
 </style>
 {% endblock %}
@@ -305,14 +326,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     <main class="main-content">
         <div class="calc-container">
             <div class="page-header">
-                <h1 class="page-title">Nova Proposta de Honorários</h1>
-                <p class="page-subtitle">Preencha as informações para gerar sua proposta profissional</p>
+                <h1 class="page-title">Novo Cálculo de Honorários</h1>
+                <p class="page-subtitle">Configure seu orçamento profissional em 4 passos simples</p>
             </div>
 
+            <!-- Stepper -->
             <div class="stepper">
                 <div class="step active" data-step="1">
                     <div class="step-number">1</div>
-                    <div class="step-label">Cliente & Serviço</div>
+                    <div class="step-label">Dados Básicos</div>
                 </div>
                 <div class="step" data-step="2">
                     <div class="step-number">2</div>
@@ -320,7 +342,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
                 </div>
                 <div class="step" data-step="3">
                     <div class="step-number">3</div>
-                    <div class="step-label">Complexidade</div>
+                    <div class="step-label">Ajustes</div>
                 </div>
                 <div class="step" data-step="4">
                     <div class="step-number">4</div>
@@ -328,18 +350,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
                 </div>
             </div>
 
-            <!-- Step 1: Cliente e Serviço -->
+            <!-- Step 1: Dados Básicos -->
             <div class="calc-card active" id="step1">
-                <h2>Informações do Cliente e Serviço</h2>
-                <p>Dados básicos sobre o cliente e tipo de perícia solicitada</p>
+                <h2>Dados do Cliente e Serviço</h2>
+                <p>Informe os dados básicos do cliente e tipo de serviço a ser realizado</p>
 
                 <div class="form-group">
                     <label for="nome_cliente">Nome do Cliente *</label>
-                    <input type="text" id="nome_cliente" required placeholder="Nome completo ou razão social">
+                    <input type="text" id="nome_cliente" required placeholder="Nome completo do cliente">
                 </div>
 
                 <div class="form-group">
-                    <label for="telefone_cliente">Telefone de Contato</label>
+                    <label for="telefone_cliente">Telefone do Cliente</label>
                     <input type="tel" id="telefone_cliente" placeholder="(11) 98765-4321">
                 </div>
 
@@ -347,37 +369,29 @@ input[type="range"]::-webkit-slider-thumb:hover {
                     <label>Tipo de Serviço *</label>
                     <div class="service-grid">
                         <div class="service-option">
-                            <input type="radio" name="tipo_servico" id="parecer" value="Parecer Técnico">
-                            <label for="parecer" class="service-label">
-                                <div class="service-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <div class="service-name">Parecer Técnico</div>
-                                <div class="service-desc">Análise e opinião técnica</div>
-                            </label>
-                        </div>
-                        <div class="service-option">
-                            <input type="radio" name="tipo_servico" id="avaliacao" value="Avaliação Psicológica">
+                            <input type="radio" name="tipo_servico" id="avaliacao" value="Avaliação Psicológica" checked>
                             <label for="avaliacao" class="service-label">
                                 <div class="service-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
-                                        <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
                                     </svg>
                                 </div>
                                 <div class="service-name">Avaliação Psicológica</div>
-                                <div class="service-desc">Avaliação completa</div>
+                                <div class="service-desc">Avaliação completa do perfil</div>
                             </label>
                         </div>
                         <div class="service-option">
                             <input type="radio" name="tipo_servico" id="pericia" value="Perícia Judicial">
                             <label for="pericia" class="service-label">
                                 <div class="service-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 6h18M5 6v14a2 2 0 002 2h10a2 2 0 002-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                        <line x1="9" y1="21" x2="9" y2="9"></line>
                                     </svg>
                                 </div>
                                 <div class="service-name">Perícia Judicial</div>
@@ -388,8 +402,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
                             <input type="radio" name="tipo_servico" id="outro" value="Outro Serviço">
                             <label for="outro" class="service-label">
                                 <div class="service-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                                        <line x1="8" y1="12" x2="16" y2="12"></line>
                                     </svg>
                                 </div>
                                 <div class="service-name">Outro Serviço</div>
@@ -403,8 +419,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
                     <div></div>
                     <button type="button" class="btn btn-primary" onclick="nextStep()">
                         Próximo
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
                     </button>
                 </div>
@@ -412,45 +429,63 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
             <!-- Step 2: Valores Base -->
             <div class="calc-card" id="step2">
-                <h2>Valores Base e Horas</h2>
-                <p>Configure o valor base e as horas de análise estimadas</p>
+                <h2>Defina seu Valor/Hora</h2>
+                <p>Configure quanto você deseja cobrar por hora de trabalho neste caso</p>
 
                 <div class="form-group">
-                    <label for="valor_base">Valor Base do Serviço (R$) *</label>
-                    <input type="number" step="0.01" id="valor_base" required placeholder="1000.00" value="1000.00">
-                    <small class="form-help">Valor mínimo do serviço antes de ajustes</small>
+                    <label for="valor_hora_cobrado">Quanto você vai cobrar por hora? (R$) *</label>
+                    <input type="number" step="0.01" id="valor_hora_cobrado" required placeholder="100.00" value="100.00" oninput="updateCustoHoras()">
+                    <small class="form-help">Valor que será cobrado do cliente por cada hora de trabalho</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="horas_analise">Horas de Análise Estimadas *</label>
-                    <input type="number" step="0.5" id="horas_analise" required placeholder="10.0" value="10.0">
-                    <small class="form-help">Total de horas que serão dedicadas ao caso</small>
+                    <label for="horas_analise">Quantas horas vai dedicar ao caso? *</label>
+                    <input type="number" step="0.5" id="horas_analise" required placeholder="10.0" value="10.0" oninput="updateCustoHoras()">
+                    <small class="form-help">Estimativa total de horas de trabalho</small>
                 </div>
 
                 {% if custos_fixos %}
                 <div class="summary-box">
-                    <div class="summary-row">
-                        <span class="summary-label">Taxa Horária Configurada:</span>
-                        <span class="summary-value">R$ {{ "%.2f" | format((custos_fixos.aluguel_consultorio + custos_fixos.internet_telefonia + custos_fixos.ferramentas_software + custos_fixos.anuidade_crp + custos_fixos.funcionarios_salarios + custos_fixos.outros_custos) / custos_fixos.horas_trabalhadas_mes) }}</span>
+                    <div class="summary-row" style="background: #fef3c7; margin: -1.5rem -1.5rem 1rem; padding: 1rem 1.5rem; border-radius: 0.75rem 0.75rem 0 0; border-bottom: 2px solid #fbbf24;">
+                        <span class="summary-label" style="color: #92400e;">💡 Sugestão baseada nos seus custos:</span>
+                        <span class="summary-value" id="sugestaoValor" style="color: #92400e; font-size: 1.5rem;">R$ 0,00</span>
                     </div>
+                    
                     <div class="summary-row">
-                        <span class="summary-label">Custo Horas Análise:</span>
-                        <span class="summary-value" id="custoHoras">R$ 0,00</span>
+                        <span class="summary-label">Seus custos operacionais/hora:</span>
+                        <span class="summary-value" style="color: #6b7280;">R$ {{ "%.2f" | format((custos_fixos.aluguel_consultorio + custos_fixos.internet_telefonia + custos_fixos.ferramentas_software + custos_fixos.anuidade_crp + custos_fixos.funcionarios_salarios + custos_fixos.outros_custos) / custos_fixos.horas_trabalhadas_mes) | replace('.', ',') }}</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span class="summary-label">Total de horas:</span>
+                        <span class="summary-value" id="horasDisplay">10h</span>
+                    </div>
+                    
+                    <div class="summary-row" style="border-top: 2px solid rgba(5, 150, 105, 0.2); padding-top: 1rem; margin-top: 0.75rem;">
+                        <span class="summary-label"><strong>Valor a cobrar do cliente:</strong></span>
+                        <span class="summary-value" id="valorTotalHoras" style="font-size: 1.5rem;">R$ 0,00</span>
+                    </div>
+                    
+                    <div class="summary-row summary-total" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); margin: 1rem -1.5rem -1.5rem; padding: 1rem 1.5rem; border-radius: 0 0 0.75rem 0.75rem;">
+                        <span class="summary-label">💰 Seu lucro líquido:</span>
+                        <span class="summary-value" id="lucroLiquido" style="color: #047857; font-size: 1.75rem;">R$ 0,00</span>
                     </div>
                 </div>
                 {% endif %}
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-prev" onclick="prevStep()">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                         Voltar
                     </button>
                     <button type="button" class="btn btn-primary" onclick="nextStep()">
                         Próximo
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
                     </button>
                 </div>
@@ -459,12 +494,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
             <!-- Step 3: Complexidade -->
             <div class="calc-card" id="step3">
                 <h2>Fatores de Complexidade</h2>
-                <p>Ajuste o valor conforme a complexidade do caso</p>
+                <p>Ajuste o valor conforme urgência, especificidade e complexidade do caso</p>
 
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>Grau de Urgência</span>
-                        <span class="slider-value" id="urgenciaLabel">0%</span>
+                        <span class="slider-value" id="urgenciaLabel">+0%</span>
                     </div>
                     <input type="range" id="urgencia" min="0" max="50" value="0" step="5" oninput="updateSlider('urgencia')">
                     <div class="slider-markers">
@@ -477,7 +512,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>Grau de Especificidade</span>
-                        <span class="slider-value" id="especificidadeLabel">0%</span>
+                        <span class="slider-value" id="especificidadeLabel">+0%</span>
                     </div>
                     <input type="range" id="especificidade" min="0" max="30" value="0" step="5" oninput="updateSlider('especificidade')">
                     <div class="slider-markers">
@@ -489,7 +524,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>Grau de Complexidade</span>
-                        <span class="slider-value" id="complexidadeLabel">0%</span>
+                        <span class="slider-value" id="complexidadeLabel">+0%</span>
                     </div>
                     <input type="range" id="complexidade" min="0" max="40" value="0" step="5" oninput="updateSlider('complexidade')">
                     <div class="slider-markers">
@@ -501,30 +536,27 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
                 <div class="summary-box" id="ajustesPreview">
                     <div class="summary-row">
-                        <span class="summary-label">Valor Base:</span>
-                        <span class="summary-value" id="previewBase">R$ 0,00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Ajustes:</span>
-                        <span class="summary-value" id="previewAjustes">+ R$ 0,00</span>
+                        <span class="summary-label">Ajustes de Complexidade:</span>
+                        <span class="summary-value" id="previewAjustes">+0%</span>
                     </div>
                     <div class="summary-row summary-total">
-                        <span class="summary-label">Valor Ajustado:</span>
-                        <span class="summary-value" id="previewTotal">R$ 0,00</span>
+                        <span class="summary-label">Este percentual será aplicado sobre o valor total</span>
                     </div>
                 </div>
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-prev" onclick="prevStep()">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                         Voltar
                     </button>
                     <button type="button" class="btn btn-primary" onclick="nextStep()">
                         Próximo
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
                     </button>
                 </div>
@@ -533,7 +565,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
             <!-- Step 4: Resumo e Finalização -->
             <div class="calc-card" id="step4">
                 <h2>Resumo da Proposta</h2>
-                <p>Revise todos os dados antes de finalizar</p>
+                <p>Revise todos os dados antes de finalizar o orçamento</p>
 
                 <div class="summary-box">
                     <div class="summary-row">
@@ -545,20 +577,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
                         <span class="summary-value" id="finalServico">-</span>
                     </div>
                     <div class="summary-row">
-                        <span class="summary-label">Valor Base:</span>
-                        <span class="summary-value" id="finalBase">R$ 0,00</span>
+                        <span class="summary-label">Horas × Valor/Hora:</span>
+                        <span class="summary-value" id="finalBase">-</span>
                     </div>
                     <div class="summary-row">
-                        <span class="summary-label">Horas de Análise:</span>
-                        <span class="summary-value" id="finalHoras">0h</span>
+                        <span class="summary-label">Valor Pelas Horas:</span>
+                        <span class="summary-value" id="finalHoras">R$ 0,00</span>
                     </div>
                     <div class="summary-row">
-                        <span class="summary-label">Custo Horas:</span>
-                        <span class="summary-value" id="finalCustoHoras">R$ 0,00</span>
+                        <span class="summary-label">Ajustes de Complexidade:</span>
+                        <span class="summary-value" id="finalCustoHoras">Nenhum</span>
                     </div>
                     <div class="summary-row">
-                        <span class="summary-label">Ajustes Aplicados:</span>
-                        <span class="summary-value" id="finalAjustes">0%</span>
+                        <span class="summary-label">Valor dos Ajustes:</span>
+                        <span class="summary-value" id="finalAjustes">R$ 0,00</span>
                     </div>
                     <div class="summary-row summary-total">
                         <span class="summary-label">Valor Total:</span>
@@ -573,14 +605,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-prev" onclick="prevStep()">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M16 10H4M8 6l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                         Voltar
                     </button>
                     <button type="button" class="btn btn-success" onclick="finalizarOrcamento()">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         Finalizar e Salvar
                     </button>
@@ -590,5 +623,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
     </main>
 </div>
 
+<script>
+// Passar taxa horária do backend
+window.TAXA_HORARIA = {{ "%.2f" | format((custos_fixos.aluguel_consultorio + custos_fixos.internet_telefonia + custos_fixos.ferramentas_software + custos_fixos.anuidade_crp + custos_fixos.funcionarios_salarios + custos_fixos.outros_custos) / custos_fixos.horas_trabalhadas_mes) if custos_fixos else '37.50' }};
+</script>
 <script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
 {% endblock %}

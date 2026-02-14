@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Configurações - Calculadora Pericial{% endblock %}
+{% block title %}Configurações - PeriCalc{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -13,6 +13,7 @@
     border-radius: var(--radius-xl);
     padding: var(--spacing-2xl);
     margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--color-border);
 }
 
 .config-card h2 {
@@ -33,19 +34,6 @@
     color: var(--color-text-light);
     margin-bottom: var(--spacing-xl);
 }
-
-.danger-zone {
-    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-    border: 1px solid #ef5350;
-}
-
-.danger-zone h2 {
-    color: #c62828;
-}
-
-.danger-zone p {
-    color: #c62828;
-}
 </style>
 {% endblock %}
 
@@ -62,9 +50,9 @@
 
             <form method="POST" class="config-card">
                 <h2>
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
-                        <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
                     </svg>
                     Dados Profissionais
                 </h2>
@@ -80,7 +68,7 @@
                     <div class="form-group">
                         <label for="numero_crp">Número CRP</label>
                         <input type="text" id="numero_crp" name="numero_crp" 
-                               value="{{ user.numero_crp if user else '' }}" placeholder="Ex: SP 12.345">
+                               value="{{ user.numero_crp if user else '' }}" placeholder="Ex: 06/12345">
                     </div>
 
                     <div class="form-group">
@@ -98,8 +86,8 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         Salvar Alterações
                     </button>
@@ -108,9 +96,9 @@
 
             <form method="POST" class="config-card">
                 <h2>
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 17v-2M8 11V7a4 4 0 118 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                     Segurança
                 </h2>
@@ -125,8 +113,8 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M15 7L8 14l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         Atualizar Senha
                     </button>

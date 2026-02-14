@@ -14,7 +14,7 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR');
 }
 
-// Toast notification (simple version)
+// Toast notification
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -24,12 +24,13 @@ function showToast(message, type = 'info') {
         bottom: 2rem;
         right: 2rem;
         padding: 1rem 1.5rem;
-        background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#2c3e50'};
+        background: ${type === 'success' ? '#059669' : type === 'error' ? '#ef4444' : '#0ea5e9'};
         color: white;
         border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         z-index: 9999;
         animation: slideIn 0.3s ease-out;
+        font-weight: 500;
     `;
     
     document.body.appendChild(toast);
@@ -88,6 +89,19 @@ document.addEventListener('DOMContentLoaded', function() {
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = this.scrollHeight + 'px';
+        });
+    });
+    
+    // Formatar inputs de moeda
+    const currencyInputs = document.querySelectorAll('input[type="number"][step="0.01"]');
+    currencyInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2);
+                }
+            }
         });
     });
 });
